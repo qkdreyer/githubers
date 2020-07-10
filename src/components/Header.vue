@@ -1,9 +1,16 @@
 <template>
   <div class="flex">
     <div class="flex-item">
-      <h1>Githubers</h1>
+      <div class="flex">
+        <div class="flex-item img-container">
+          <img class="flex" alt="githubers" src="githubers.png" />
+        </div>
+        <div class="flex-item">
+          <h1>Githubers</h1>
+        </div>
+      </div>
     </div>
-    <div class="flex-item">
+    <div class="flex-grow text-right">
       <input type="text" :value="repo" @change="onChange" @keyup.13="onChange" />
     </div>
   </div>
@@ -31,8 +38,14 @@ hr {
 input {
   padding: 10px 5px;
   width: 250px;
+  margin-right: 30px;
 }
-.flex {
-  margin: 0 3%;
+img {
+  width: 100%;
+  height: 100%;
+}
+.img-container {
+  flex-basis: 80px;
+  padding: 0 10px;
 }
 </style>

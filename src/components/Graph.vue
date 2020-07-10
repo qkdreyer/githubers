@@ -54,17 +54,11 @@ export default {
 .flex {
   padding: 10px;
 }
-.flex-grow {
-  flex-grow: 1;
-}
 .flex-half {
   width: 50%;
   padding: 10px 0;
 }
 .info {
   margin: 0 20px;
-}
-.text-right {
-  text-align: right;
 }
 </style>

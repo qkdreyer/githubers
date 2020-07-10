@@ -39,9 +39,13 @@ export default {
 }
 .flex {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  flex-flow: row wrap;
   align-items: center;
+}
+.flex-grow {
+  flex-grow: 1;
+}
+.text-right {
+  text-align: right;
 }
 </style>
