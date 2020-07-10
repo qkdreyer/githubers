@@ -1,17 +1,31 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Header :repo="repo" @change="onChange" />
+    <hr />
+    <Graphs :repo="repo" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from './components/Header.vue'
+import Graphs from './components/Graphs.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Header,
+    Graphs,
+  },
+  data() {
+    console.log(this.$root.getParam('repo'))
+    return {
+      repo: this.$root.getParam('repo'),
+    }
+  },
+  methods: {
+    onChange(repo) {
+      this.repo = repo
+    }
   }
 }
 </script>
@@ -21,8 +35,13 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+.flex {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
