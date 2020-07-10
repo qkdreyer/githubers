@@ -9,7 +9,7 @@ new Vue({
   data() {
     return {
       octokit: new Octokit({
-        auth: this.getParam('token')
+        auth: process.env.GITHUB_TOKEN || this.getParam('token')
       })
     }
   },
