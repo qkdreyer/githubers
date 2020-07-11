@@ -1,30 +1,33 @@
 <template>
   <div id="app">
-    <Header :repo="repo" @change="onChange" />
+    <Header :repos="repos" @change="onChange" />
     <hr />
-    <Graphs :repo="repo" />
+    <Graphs :repos="repos" />
+    <hr />
+    <Footer />
   </div>
 </template>
 
 <script>
 import Header from './components/Header.vue'
 import Graphs from './components/Graphs.vue'
+import Footer from './components/Footer.vue'
 
 export default {
   name: 'App',
   components: {
     Header,
     Graphs,
+    Footer,
   },
   data() {
-    console.log(this.$root.getParam('repo'))
     return {
-      repo: this.$root.getParam('repo'),
+      repos: this.$root.getAllParam('repos'),
     }
   },
   methods: {
-    onChange(repo) {
-      this.repo = repo
+    onChange(repos) {
+      this.repos = repos
     }
   }
 }
@@ -42,10 +45,22 @@ export default {
   flex-flow: row wrap;
   align-items: center;
 }
+.flex-item {
+  flex: 0 0 auto;
+}
 .flex-grow {
   flex-grow: 1;
 }
 .text-right {
   text-align: right;
+}
+a {
+  color: #2c3e50;
+}
+.green {
+  color: green;
+}
+.red {
+  color: red;
 }
 </style>

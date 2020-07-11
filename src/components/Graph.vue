@@ -1,11 +1,17 @@
 <template>
-  <div class="flex-item flex-half">
+  <div class="graph">
     <div class="flex">
       <div class="flex-item">
-        #{{this.index + 1}} {{this.githuber.login}}
+        <span>#{{this.index + 1}}</span>
+        &nbsp;
+        <a :href="`https://github.com/${this.githuber.login}`">{{this.githuber.login}}</a>
       </div>
       <div class="flex-item flex-grow text-right" :title="slocPerDay">
-        {{this.githuber.total}} commits ++{{this.githuber.a}} --{{this.githuber.d}}
+        <span>{{this.githuber.total}} commits</span>
+        &nbsp;
+        <span class="green">{{this.githuber.a}} ++</span>
+        &nbsp;
+        <span class="red">{{this.githuber.d}} --</span>
       </div>
     </div>
     <Chart :chartData="chartData" />
@@ -27,25 +33,37 @@ export default {
   },
   computed: {
     slocPerDay() {
-      return Math.round((this.githuber.a + this.githuber.d) / ((20 * 12) - 5)) + ' sloc/day';
+      return Math.round((this.githuber.a + this.githuber.d) / ((20 * 12) - 5)) + ' sloc/day'
     },
     chartData() {
-      return this.githuber.weeks.reduce((carry, { w, a, d }) => {
-        carry.labels.push('W' + moment(w * 1000).week())
+      return this.githuber.weeks.reduce((carry, { w, a, d, raw }) => {
+        carry.labels.push(moment(w * 1000).format('MMM'))
         carry.datasets[0].data.push(a)
         carry.datasets[1].data.push(d)
+        carry.datasets[0].raw.push(raw.a)
+        carry.datasets[1].raw.push(raw.d)
         return carry;
       }, {
         labels: [],
         datasets: [{
           label: '++',
           data: [],
+          raw: [],
+          borderColor: '#00FF00',
+          pointBackgroundColor: 'transparent',
+          borderWidth: 1,
+          pointBorderColor: 'transparent',
         }, {
           label: '--',
           data: [],
+          raw: [],
+          borderColor: '#FF0000',
+          pointBackgroundColor: 'transparent',
+          borderWidth: 1,
+          pointBorderColor: 'transparent',
         }],
       })
-    }
+    },
   },
 }
 </script>
@@ -53,10 +71,6 @@ export default {
 <style scoped>
 .flex {
   padding: 10px;
-}
-.flex-half {
-  width: 50%;
-  padding: 10px 0;
 }
 .info {
   margin: 0 20px;
