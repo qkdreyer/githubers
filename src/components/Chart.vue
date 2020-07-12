@@ -1,15 +1,20 @@
 <script>
 import { Line, mixins } from 'vue-chartjs'
-const { reactiveProp } = mixins
+import moment from 'moment'
+
+const { reactiveData } = mixins
+moment.locale(navigator.language)
 
 export default {
   extends: Line,
-  mixins: [reactiveProp],
+  mixins: [reactiveData],
   props: {
+    data: {
+      type: Array,
+    },
     options: {
       type: Object,
       default: () => ({
-        responsive: true,
         maintainAspectRatio: false,
         scales: {
           xAxes: [{
@@ -27,10 +32,11 @@ export default {
         },
         tooltips: {
           callbacks: {
+            title: ([{ index }], object) => object.datalabel[index],
             label({ datasetIndex, index }, object) {
               const { label, data } = object.datasets[datasetIndex]
               const kv = (key, value) => `${key} : ${value}`
-              return [kv(label, data[index])].concat(Object.entries(object.datasets[datasetIndex].raw[index]).map(([repo, value]) => kv(repo, value)))
+              return [kv(label, data[index])].concat(Object.entries(object.datasets[datasetIndex].raw[index]).map(([repo, value]) => kv(`・${repo}`, value)))
             },
             labelColor({ datasetIndex }, { config: { data } }) {
               const { backgroundColor, borderColor } = data.datasets[datasetIndex]
@@ -44,12 +50,50 @@ export default {
       }),
     },
   },
+  computed: {
+    reactiveData() {
+      return this.data.reduce((carry, { w, a, d, raw }) => {
+        const m = moment(w * 1000)
+        carry.labels.push(m.format('MMM'))
+        carry.datalabel.push(`${m.format('L')} - ${m.add(1, 'w').format('L')}`)
+        carry.datasets[0].data.push(a)
+        carry.datasets[1].data.push(d)
+        carry.datasets[0].raw.push(raw.a)
+        carry.datasets[1].raw.push(raw.d)
+        return carry;
+      }, {
+        labels: [],
+        datalabel: [],
+        datasets: [{
+          label: '++',
+          data: [],
+          raw: [],
+          borderColor: '#00FF00',
+          pointBackgroundColor: 'transparent',
+          borderWidth: 1,
+          pointBorderColor: 'transparent',
+          backgroundColor: this.gradient(0, 255, 0, 0.5),
+        }, {
+          label: '--',
+          data: [],
+          raw: [],
+          borderColor: '#FF0000',
+          pointBackgroundColor: 'transparent',
+          borderWidth: 1,
+          pointBorderColor: 'transparent',
+          backgroundColor: this.gradient(255, 0, 0, 0.5),
+        }],
+      })
+    },
+  },
   watch: {
-    chartData() {
-      this.chartData.datasets = this.chartData.datasets.map(data => ({
-        ...data,
-        backgroundColor: this.gradient(Number(data.label !== '++') * 255, Number(data.label === '++') * 255, 0, data.label === '++' ? 0.25 : 0.25),
-      }))
+    data: {
+      handler() {
+        this.$nextTick(() => {
+          this.chartData = this.reactiveData
+        })
+      },
+      immediate: true
     },
   },
   mounted() {
@@ -57,7 +101,7 @@ export default {
   },
   methods: {
     gradient(r, g, b, a1, a2 = 0.25, a3 = 0) {
-      var gradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
+      const gradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
       gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${a1})`)
       gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${a2})`)
       gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${a3})`)

@@ -17,11 +17,13 @@ export default {
   props: {
     repos: Array,
   },
-  data: () => ({
-    contributors: {},
-    githubers: [],
-    periodiciy: 52,
-  }),
+  data() {
+    return {
+      contributors: {},
+      githubers: [],
+      periodicity: this.$root.hasParam('weeks') ? Number(this.$root.getParam('weeks')) : 0,
+    }
+  },
   watch: {
     repos: {
       handler(repos) {
@@ -34,12 +36,15 @@ export default {
   },
   methods: {
     async search(repos) {
-      this.githubers = Object.values((await this.get(repos)).reduce((carry, { data, repo }) => {
+      const data = await this.get(repos);
+      const max = data.reduce((carry, { data }) => Math.max(carry, data[0].weeks.slice(-this.periodicity).length), 0)
+      this.githubers = Object.values(data.reduce((carry, { data, repo }) => {
         data.forEach(({ weeks, author: { login } }) => {
-          const slice = weeks.slice(-this.periodiciy)
+          const slice = weeks.slice(-this.periodicity)
+          const offset = max - slice.length
           if (!carry[login]) {
             carry[login] = {
-              weeks: Array(this.periodiciy).fill().map(() => ({
+              weeks: Array(max).fill().map(() => ({
                 a: 0,
                 d: 0,
                 c: 0,
@@ -57,29 +62,30 @@ export default {
             }
           }
           slice.forEach(({ w, a, d, c }, index) => {
-            var _a = this.ceil(a)
-            var _d = this.ceil(d)
+            const idx = index + offset
+            const _a = this.ceil(a)
+            const _d = this.ceil(d)
 
-            carry[login].weeks[index].w = w
-            carry[login].weeks[index].a += _a
-            carry[login].weeks[index].d += _d
-            carry[login].weeks[index].c += c
-            carry[login].weeks[index].ad += _a + _d
+            carry[login].weeks[idx].w = w
+            carry[login].weeks[idx].a += _a
+            carry[login].weeks[idx].d += _d
+            carry[login].weeks[idx].c = c
+            carry[login].weeks[idx].ad += _a + _d
 
             if (_a > 0) {
-              carry[login].weeks[index].raw.a[repo] = _a
+              carry[login].weeks[idx].raw.a[repo] = _a
             }
             if (_d > 0) {
-              carry[login].weeks[index].raw.d[repo] = _d
+              carry[login].weeks[idx].raw.d[repo] = _d
             }
           })
-          carry[login].a += carry[login].weeks.reduce((sum, { a }) => sum + a, 0)
-          carry[login].d += carry[login].weeks.reduce((sum, { d }) => sum + d, 0)
+          carry[login].a += slice.reduce((sum, { a }) => sum + a, 0)
+          carry[login].d += slice.reduce((sum, { d }) => sum + d, 0)
           carry[login].ad += carry[login].a + carry[login].d
-          carry[login].total += carry[login].weeks.reduce((sum, { c }) => sum + c, 0)
+          carry[login].total += slice.reduce((sum, { c }) => sum + c, 0)
         })
         return carry;
-      }, {})).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, 10)
+      }, {})).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
     },
     async get(repos) {
       return await Promise.all(repos.map(async repo => {
@@ -99,30 +105,14 @@ export default {
         repo: repo || owner,
       }
     },
-    ceil: value => Math.min(value, 100000)
+    ceil: value => Math.min(value, 1000000)
   },
 }
 </script>
 
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-.flex {
-  padding: 5px;
-}
 .flex-item {
-  margin: 5px;
+  margin: 10px;
+  flex: 1 0 200px;
 }
 </style>

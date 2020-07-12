@@ -23,7 +23,7 @@ export default {
 
 <style scoped>
 p {
-    width: 100%;
-    text-align: center;
+  width: 100%;
+  text-align: center;
 }
 </style>

@@ -14,13 +14,12 @@
         <span class="red">{{this.githuber.d}} --</span>
       </div>
     </div>
-    <Chart :chartData="chartData" />
+    <Chart cssClasses="chart-container" :data="githuber.weeks" />
   </div>
 </template>
 
 <script>
 import Chart from './Chart.vue'
-import moment from 'moment'
 
 export default {
   name: 'Graph',
@@ -35,35 +34,6 @@ export default {
     slocPerDay() {
       return Math.round((this.githuber.a + this.githuber.d) / ((20 * 12) - 5)) + ' sloc/day'
     },
-    chartData() {
-      return this.githuber.weeks.reduce((carry, { w, a, d, raw }) => {
-        carry.labels.push(moment(w * 1000).format('MMM'))
-        carry.datasets[0].data.push(a)
-        carry.datasets[1].data.push(d)
-        carry.datasets[0].raw.push(raw.a)
-        carry.datasets[1].raw.push(raw.d)
-        return carry;
-      }, {
-        labels: [],
-        datasets: [{
-          label: '++',
-          data: [],
-          raw: [],
-          borderColor: '#00FF00',
-          pointBackgroundColor: 'transparent',
-          borderWidth: 1,
-          pointBorderColor: 'transparent',
-        }, {
-          label: '--',
-          data: [],
-          raw: [],
-          borderColor: '#FF0000',
-          pointBackgroundColor: 'transparent',
-          borderWidth: 1,
-          pointBorderColor: 'transparent',
-        }],
-      })
-    },
   },
 }
 </script>
@@ -72,7 +42,9 @@ export default {
 .flex {
   padding: 10px;
 }
-.info {
-  margin: 0 20px;
+.chart-container {
+  /* position: relative; */
+  height: 30vh;
+  /* width: 100%; */
 }
 </style>

@@ -13,6 +13,10 @@
     <div class="flex-grow text-right">
       <Multiselect
         v-model="model"
+        placeholder="Add a repository"
+        tagPlaceholder="Press ENTER to add this repository"
+        deselectLabel="Press ENTER to remove this repository"
+        selectedLabel="Selected repository"
         :options="options"
         :multiple="true"
         :taggable="true"
@@ -55,11 +59,6 @@ export default {
 <style scoped>
 hr {
   opacity: 0.5;
-}
-.multiselect {
-  /* padding: 10px 5px; */
-  /* width: 250px; */
-  /* margin-right: 30px; */
 }
 img {
   width: 100%;

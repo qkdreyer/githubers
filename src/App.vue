@@ -22,7 +22,10 @@ export default {
   },
   data() {
     return {
-      repos: this.$root.getAllParam('repos'),
+      repos: [].concat.apply([], this.$root.getAllParam('repos').map(repos => {
+        const matches = repos.match(/(\w+\/)\{([\S]+)\}/)
+        return !matches ? [repos] : matches.slice(2).pop().split(',').map(repo => matches.slice(1, 2) + repo)
+      })).filter((value, index, self) => self.indexOf(value) === index),
     }
   },
   methods: {
@@ -58,9 +61,15 @@ a {
   color: #2c3e50;
 }
 .green {
-  color: green;
+  color: #22da2c;
+}
+.multiselect__tag, .multiselect__option--highlight, .multiselect__option--highlight:after {
+  background-color: #22da2c
 }
 .red {
-  color: red;
+  color: #f80808;
+}
+.multiselect__option--selected.multiselect__option--highlight, .multiselect__option--selected.multiselect__option--highlight:after {
+  background-color: #f80808;
 }
 </style>
