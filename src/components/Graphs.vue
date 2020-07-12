@@ -79,13 +79,16 @@ export default {
               carry[login].weeks[idx].raw.d[repo] = _d
             }
           })
-          carry[login].a += slice.reduce((sum, { a }) => sum + a, 0)
-          carry[login].d += slice.reduce((sum, { d }) => sum + d, 0)
-          carry[login].ad += carry[login].a + carry[login].d
+
+          const a = slice.reduce((sum, { a }) => sum + a, 0)
+          const d = slice.reduce((sum, { d }) => sum + d, 0)
+          carry[login].a += a
+          carry[login].d += d
+          carry[login].ad += a + d
           carry[login].total += slice.reduce((sum, { c }) => sum + c, 0)
         })
         return carry;
-      }, {})).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
+      }, {})).sort((a, b) => console.log(a.ad, b.ad) || a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
     },
     async get(repos) {
       return await Promise.all(repos.map(async repo => {
