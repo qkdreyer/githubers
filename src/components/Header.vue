@@ -1,14 +1,16 @@
 <template>
   <div class="flex">
     <div class="flex-item">
-      <div class="flex">
-        <div class="flex-item img-container">
-          <img class="flex" alt="githubers" src="githubers.png" />
+      <a target="_blank" href="https://github.com/qkdreyer/githubers">
+        <div class="flex">
+          <div class="flex-item img-container">
+            <img class="flex" alt="githubers" src="githubers.png" />
+          </div>
+          <div class="flex-item">
+            <h1>Githubers</h1>
+          </div>
         </div>
-        <div class="flex-item">
-          <h1>Githubers</h1>
-        </div>
-      </div>
+      </a>
     </div>
     <div class="flex-grow text-right">
       <Multiselect
@@ -63,6 +65,9 @@ hr {
 img {
   width: 100%;
   height: 100%;
+}
+a {
+  text-decoration: none;
 }
 .img-container {
   flex-basis: 80px;
