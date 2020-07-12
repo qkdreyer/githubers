@@ -88,7 +88,7 @@ export default {
           carry[login].total += slice.reduce((sum, { c }) => sum + c, 0)
         })
         return carry;
-      }, {})).sort((a, b) => console.log(a.ad, b.ad) || a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
+      }, {})).filter(({ ad }) => ad > 0).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
     },
     async get(repos) {
       return await Promise.all(repos.map(async repo => {
