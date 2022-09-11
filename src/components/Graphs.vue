@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     async search(repos) {
-      const data = await this.get(repos);
+      const data = (await this.get(repos)).filter(({ status }) => status === 200);
       const max = data.reduce((carry, { data }) => Math.max(carry, data[0].weeks.slice(-this.periodicity).length), 0)
       this.githubers = Object.values(data.reduce((carry, { data, repo }) => {
         data.forEach(({ weeks, author: { login } }) => {
@@ -80,8 +80,8 @@ export default {
             }
           })
 
-          const a = slice.reduce((sum, { a }) => sum + a, 0)
-          const d = slice.reduce((sum, { d }) => sum + d, 0)
+          const a = slice.reduce((sum, { a }) => sum + this.ceil(a), 0)
+          const d = slice.reduce((sum, { d }) => sum + this.ceil(d), 0)
           carry[login].a += a
           carry[login].d += d
           carry[login].ad += a + d
@@ -91,6 +91,14 @@ export default {
       }, {})).filter(({ ad }) => ad > 0).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
     },
     async get(repos) {
+      repos = await repos.reduce(async (promise, repo) => {
+        const carry = await promise
+        if (!repo.includes('/')) {
+          const { data } = await this.$root.octokit.request('GET /orgs/{org}/repos', {org: repo, per_page: 100})
+          return carry.concat(data.map(({ name }) => `${repo}/${name}`))
+        }
+        return carry.concat([repo]);
+      }, Promise.resolve([]))
       return await Promise.all(repos.map(async repo => {
         if (!this.contributors[repo]) {
           this.contributors[repo] = await this.$root.octokit.request('GET /repos/{owner}/{repo}/stats/contributors', this.parse(repo))
@@ -108,7 +116,9 @@ export default {
         repo: repo || owner,
       }
     },
-    ceil: value => Math.min(value, 1000000)
+    ceil(value) {
+      return value > Number(this.$root.getParam('threshold') || 50000) ? 0 : value
+    },
   },
 }
 </script>
