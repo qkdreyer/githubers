@@ -8,7 +8,7 @@
         <span> + </span>
         <a target="_blank" href="https://www.chartjs.org">Chart.js</a>
         <span> + </span>
-        <a target="_blank" href="https://github.com/octokit/core.js">Octokit</a>
+        <a target="_blank" href="https://github.com/octokit/octokit.js">Octokit</a>
         <span> and powered by </span>
         <a target="_blank" href="https://vercel.com/">Vercel</a>.
     </p>

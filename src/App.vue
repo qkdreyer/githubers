@@ -1,17 +1,18 @@
 <template>
   <div id="app">
-    <Header :repos="repos" @change="onChange" />
+    <Header :repos="repos" @update="onUpdate" />
     <hr />
-    <Graphs :repos="repos" />
+    <Graphs :repos="reposArray" />
     <hr />
     <Footer />
   </div>
 </template>
 
 <script>
-import Header from './components/Header.vue'
-import Graphs from './components/Graphs.vue'
-import Footer from './components/Footer.vue'
+import { getAllParam } from '@/lib/params'
+import Header from '@/components/Header.vue'
+import Graphs from '@/components/Graphs.vue'
+import Footer from '@/components/Footer.vue'
 
 export default {
   name: 'App',
@@ -22,17 +23,22 @@ export default {
   },
   data() {
     return {
-      repos: [].concat.apply([], this.$root.getAllParam('repos').map(repos => {
+      repos: [].concat.apply([], getAllParam('repos').map(repos => {
         const matches = repos.match(/(\w+\/)\{([\S]+)\}/)
         return !matches ? [repos] : matches.slice(2).pop().split(',').map(repo => matches.slice(1, 2) + repo)
       })).filter((value, index, self) => self.indexOf(value) === index),
     }
   },
   methods: {
-    onChange(repos) {
+    onUpdate(repos) {
       this.repos = repos
     }
-  }
+  },
+  computed: {
+    reposArray() {
+      return [...this.repos];
+    },
+  },
 }
 </script>
 

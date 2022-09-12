@@ -7,7 +7,9 @@
 </template>
 
 <script>
-import Graph from './Graph.vue'
+import octokit from '@/lib/octokit'
+import { hasParam, getParam } from '@/lib/params'
+import Graph from '@/components/Graph.vue'
 
 export default {
   name: 'Graphs',
@@ -21,7 +23,7 @@ export default {
     return {
       contributors: {},
       githubers: [],
-      periodicity: this.$root.hasParam('weeks') ? Number(this.$root.getParam('weeks')) : 0,
+      periodicity: hasParam('weeks') ? Number(getParam('weeks')) : 0,
     }
   },
   watch: {
@@ -88,20 +90,20 @@ export default {
           carry[login].total += slice.reduce((sum, { c }) => sum + c, 0)
         })
         return carry;
-      }, {})).filter(({ ad }) => ad > 0).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, this.$root.hasParam('limit') ? Number(this.$root.getParam('limit')) : undefined)
+      }, {})).filter(({ ad }) => ad > 0).sort((a, b) => a.ad <= b.ad ? 1 : -1).slice(0, hasParam('limit') ? Number(getParam('limit')) : undefined)
     },
     async get(repos) {
       repos = await repos.reduce(async (promise, repo) => {
         const carry = await promise
         if (!repo.includes('/')) {
-          const { data } = await this.$root.octokit.request('GET /orgs/{org}/repos', {org: repo, per_page: 100})
+          const { data } = await octokit.request('GET /orgs/{org}/repos', {org: repo, per_page: 100})
           return carry.concat(data.map(({ name }) => `${repo}/${name}`))
         }
         return carry.concat([repo]);
       }, Promise.resolve([]))
       return await Promise.all(repos.map(async repo => {
         if (!this.contributors[repo]) {
-          this.contributors[repo] = await this.$root.octokit.request('GET /repos/{owner}/{repo}/stats/contributors', this.parse(repo))
+          this.contributors[repo] = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', this.parse(repo))
         }
         return {
           repo,
@@ -117,7 +119,7 @@ export default {
       }
     },
     ceil(value) {
-      return value > Number(this.$root.getParam('threshold') || 50000) ? 0 : value
+      return value > Number(getParam('threshold') || 50000) ? 0 : value
     },
   },
 }

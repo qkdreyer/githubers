@@ -1,90 +1,117 @@
-<script>
-import { Line, mixins } from 'vue-chartjs'
-import moment from 'moment'
+<template>
+  <Line
+    :chart-data="reactiveData"
+    :chart-options="options"
+    :chart-id="`chart-${id}`"
+    css-classes="chartjs-render-monitor"
+    :styles="styles"
+    :height="150"
+  />
+</template>
 
-const { reactiveData } = mixins
-moment.locale(navigator.language)
+<script>
+import { Line } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, CategoryScale, PointElement, LineElement, LogarithmicScale, LinearScale, Filler } from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, CategoryScale, PointElement, LineElement, LogarithmicScale, LinearScale, Filler)
 
 export default {
-  extends: Line,
-  mixins: [reactiveData],
+  components: { Line },
   props: {
-    data: {
-      type: Array,
-    },
-    options: {
-      type: Object,
-      default: () => ({
-        maintainAspectRatio: false,
-        scales: {
-          xAxes: [{
-            gridLines: {
-                color: 'transparent',
-            },
-          }],
-          yAxes: [{
-            display: false,
-            type: 'logarithmic',
-            gridLines: {
-                color: 'transparent',
-            },
-          }],
-        },
-        tooltips: {
-          callbacks: {
-            title: ([{ index }], object) => object.datalabel[index],
-            label({ datasetIndex, index }, object) {
-              const { label, data } = object.datasets[datasetIndex]
-              const kv = (key, value) => `${key} : ${value}`
-              return [kv(label, data[index])].concat(Object.entries(object.datasets[datasetIndex].raw[index]).map(([repo, value]) => kv(`・${repo}`, value)))
-            },
-            labelColor({ datasetIndex }, { config: { data } }) {
-              const { backgroundColor, borderColor } = data.datasets[datasetIndex]
-              return {
-                backgroundColor,
-                borderColor,
-              }
-            },
-          },
-        },
-      }),
-    },
+    id: String,
+    data: Array,
   },
   computed: {
     reactiveData() {
-      return this.data.reduce((carry, { w, a, d, raw }) => {
-        const m = moment(w * 1000)
-        carry.labels.push(m.format('MMM'))
-        carry.datalabel.push(`${m.format('L')} - ${m.add(1, 'w').format('L')}`)
-        carry.datasets[0].data.push(a)
-        carry.datasets[1].data.push(d)
-        carry.datasets[0].raw.push(raw.a)
-        carry.datasets[1].raw.push(raw.d)
+      return this.data.reduce((carry, { w, a, d, raw, ad }) => {
+        const d1 = new Date(w * 1000)
+        const d2 = new Date(w * 1000)
+        d2.setDate(d2.getDate() + 7)
+        carry.labels.push(d1.toLocaleString('default', { month: 'short' }))
+        carry.datasets[0].data.push(`${d1.toLocaleDateString()} - ${d2.toLocaleDateString()}`)
+        carry.datasets[1].data.push(a)
+        carry.datasets[2].data.push(d)
+        carry.datasets[1].raw.push(raw.a)
+        carry.datasets[2].raw.push(raw.d)
         return carry;
       }, {
         labels: [],
-        datalabel: [],
         datasets: [{
+          label: 'period',
+          hidden: true,
+          data: []
+        }, {
           label: '++',
           data: [],
           raw: [],
+          type: 'line',
           borderColor: '#00FF00',
-          pointBackgroundColor: 'transparent',
           borderWidth: 1,
+          pointBackgroundColor: 'transparent',
           pointBorderColor: 'transparent',
           backgroundColor: this.gradient(0, 255, 0, 0.5),
+          fill: true,
         }, {
           label: '--',
           data: [],
           raw: [],
+          type: 'line',
           borderColor: '#FF0000',
           pointBackgroundColor: 'transparent',
           borderWidth: 1,
           pointBorderColor: 'transparent',
           backgroundColor: this.gradient(255, 0, 0, 0.5),
+          fill: true,
         }],
       })
     },
+    options() {
+      return {
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            grid: {
+              color: 'transparent',
+            },
+          },
+          y: {
+            display: false,
+            type: 'logarithmic',
+            grid: {
+              color: 'transparent',
+            },
+            min: 0.001,
+          },
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              title: ([{ chart: { data }, dataIndex }]) => data.datasets[0].data[dataIndex],
+              label({ dataset, dataIndex }) {
+                const { label, data, raw } = dataset
+                const kv = (key, value) => `${key} : ${value}`
+                return [kv(label, data[dataIndex])].concat(Object.entries(raw[dataIndex]).map(([repo, value]) => kv(`・${repo}`, value)))
+              },
+              labelColor: ({ dataset: { backgroundColor, borderColor } }) => ({
+                backgroundColor,
+                borderColor,
+              }),
+            },
+          },
+          legend: {
+            labels: {
+              filter: ({ text }, chart) => text !== 'period',
+            },
+          },
+        },
+      };
+    },
+    styles() {
+      return {
+        height: '30vh',
+        position: 'relative'
+      }
+    }
   },
   watch: {
     data: {
@@ -96,12 +123,9 @@ export default {
       immediate: true
     },
   },
-  mounted() {
-    this.renderChart(this.chartData, this.options)
-  },
   methods: {
     gradient(r, g, b, a1, a2 = 0.25, a3 = 0) {
-      const gradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
+      const gradient = document.createElement('canvas').getContext('2d').createLinearGradient(0, 0, 0, 450)
       gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${a1})`)
       gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${a2})`)
       gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${a3})`)

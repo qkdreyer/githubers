@@ -4,7 +4,7 @@
       <a target="_blank" href="https://github.com/qkdreyer/githubers">
         <div class="flex">
           <div class="flex-item img-container">
-            <img class="flex" alt="githubers" src="githubers.png" />
+            <img class="flex" alt="githubers" src="/githubers.png" />
           </div>
           <div class="flex-item">
             <h1>Githubers</h1>
@@ -13,8 +13,8 @@
       </a>
     </div>
     <div class="flex-grow text-right">
-      <Multiselect
-        v-model="model"
+      <VueMultiselect
+        :model-value="model"
         placeholder="Add a repository"
         tagPlaceholder="Press ENTER to add this repository"
         deselectLabel="Press ENTER to remove this repository"
@@ -22,20 +22,21 @@
         :options="options"
         :multiple="true"
         :taggable="true"
-        @input="onChange"
+        @update:model-value="onUpdate"
         @tag="addTag"
+        @change.stop
       />
     </div>
   </div>
 </template>
 
 <script>
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 export default {
   name: 'Header',
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     repos: Array,
@@ -47,17 +48,19 @@ export default {
     }
   },
   methods: {
-    onChange(value) {
-      this.$emit('change', value)
+    onUpdate(value) {
+      this.model = value
+      this.$emit('update', value)
     },
     addTag(value) {
       this.repos.push(value)
+      this.$emit('update', this.repos)
     },
   },
 }
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
 <style scoped>
 hr {
   opacity: 0.5;

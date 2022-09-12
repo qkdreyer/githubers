@@ -14,12 +14,12 @@
         <span class="red">{{this.githuber.d}} --</span>
       </div>
     </div>
-    <Chart cssClasses="chart-container" :data="githuber.weeks" />
+    <Chart :id="githuber.login" :data="githuber.weeks" />
   </div>
 </template>
 
 <script>
-import Chart from './Chart.vue'
+import Chart from '@/components/Chart.vue'
 
 export default {
   name: 'Graph',
@@ -41,10 +41,5 @@ export default {
 <style scoped>
 .flex {
   padding: 10px;
-}
-.chart-container {
-  /* position: relative; */
-  height: 30vh;
-  /* width: 100%; */
 }
 </style>
