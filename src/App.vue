@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <a @click="onAuthorize">Login with GitHub</a>
     <Header :repos="repos" @update="onUpdate" />
     <hr />
     <Graphs :repos="reposArray" />
@@ -30,6 +31,14 @@ export default {
     }
   },
   methods: {
+    onAuthorize() {
+      const clientId = import.meta.env.VITE_CLIENT_ID;
+      const state = crypto.randomUUID();
+
+      localStorage.setItem("_csrf_token", state);
+
+      window.location.assign(`https://github.com/login/oauth/authorize?client_id=${clientId}&response_type=code&scope=repo&redirect_uri=${window.location.origin}/api/auth&state=${state}`);
+    },
     onUpdate(repos) {
       this.repos = repos
     }

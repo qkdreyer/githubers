@@ -1,14 +1,7 @@
 import { createApp } from 'vue'
 import App from '@/App.vue'
-import params from '@/lib/params'
 
-createApp(App, {
-  mixins: [params],
-  data() {
-    return {
-      octokit: new Octokit({
-        auth: this.getParam('token')
-      }),
-    }
-  },
-}).mount('#app')
+if (location.search.length === 0)
+  location.search = '?repos=vuejs/vue&repos=vuejs/vuex&weeks=52'
+
+createApp(App).mount('#app')
