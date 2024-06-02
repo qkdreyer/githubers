@@ -1,4 +1,4 @@
-import { Octokit } from 'https://cdn.skypack.dev/octokit'
+import { Octokit } from 'https://esm.sh/octokit'
 import { getParam } from '@/lib/params'
 
 export default new Octokit({
