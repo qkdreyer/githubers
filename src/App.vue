@@ -32,12 +32,13 @@ export default {
   },
   methods: {
     onAuthorize() {
-      const clientId = import.meta.env.VITE_CLIENT_ID;
-      const state = crypto.randomUUID();
-
-      localStorage.setItem("_csrf_token", state);
-
-      window.location.assign(`https://github.com/login/oauth/authorize?client_id=${clientId}&response_type=code&scope=repo&redirect_uri=${window.location.origin}/api/auth&state=${state}`);
+      window.location.assign(new URL(`https://github.com/login/oauth/authorize?${new URLSearchParams({
+        client_id: import.meta.env.VITE_CLIENT_ID,
+        response_type: 'code',
+        scope: 'repo:status',
+        redirect_uri: `${window.location.origin}/api/auth`,
+        state: window.btoa(window.location.search),
+      })}`))
     },
     onUpdate(repos) {
       this.repos = repos

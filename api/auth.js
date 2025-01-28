@@ -17,7 +17,7 @@ async function exchangeCode(code, redirect_uri) {
   return access_token
 }
 
-export async function GET(request, context) {
+export async function GET(request, _context) {
   const url = new URL(request.url)
   const params = url.searchParams
   if (!params.has('code'))
@@ -35,7 +35,10 @@ export async function GET(request, context) {
     <body>
         Redirecting to <a href="%1$s">%1$s</a>.
     </body>
-</html>`.replaceAll('%1$s', `${url.origin}?token=${token}`), { headers: new Headers({
+</html>`.replaceAll('%1$s', `${url.origin}?${new URLSearchParams({
+  token: token,
+  ...(params.has('state') && Object.fromEntries(new URLSearchParams(window.atob(params.get('state'))).entries())),
+})}`), { headers: new Headers({
     'Content-Type': 'text/html',
   })})
 }
