@@ -37,7 +37,7 @@ export async function GET(request, _context) {
     </body>
 </html>`.replaceAll('%1$s', `${url.origin}?${new URLSearchParams({
   token: token,
-  ...(params.has('state') && Object.fromEntries(new URLSearchParams(window.atob(params.get('state'))).entries())),
+  ...(params.has('state') && Object.fromEntries(new URLSearchParams(atob(params.get('state'))).entries())),
 })}`), { headers: new Headers({
     'Content-Type': 'text/html',
   })})
