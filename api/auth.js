@@ -35,10 +35,10 @@ export async function GET(request, _context) {
     <body>
         Redirecting to <a href="%1$s">%1$s</a>.
     </body>
-</html>`.replaceAll('%1$s', `${url.origin}?${new URLSearchParams({
-  token: token,
-  ...(params.has('state') && Object.fromEntries(new URLSearchParams(atob(params.get('state'))).entries())),
-})}`), { headers: new Headers({
+</html>`.replaceAll('%1$s', `${url.origin}?${new URLSearchParams([
+  ['token', token],
+  ...(params.has('state') && Array.from(new URLSearchParams(atob(params.get('state'))).entries())),
+])}`), { headers: new Headers({
     'Content-Type': 'text/html',
   })})
 }
