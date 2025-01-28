@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <a @click="onAuthorize">Login with GitHub</a>
+    <a v-if="!hasToken" @click="onAuthorize">Login with GitHub</a>
     <Header :repos="repos" @update="onUpdate" />
     <hr />
     <Graphs :repos="reposArray" />
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { getAllParam } from '@/lib/params'
+import { hasParam, getAllParam } from '@/lib/params'
 import Header from '@/components/Header.vue'
 import Graphs from '@/components/Graphs.vue'
 import Footer from '@/components/Footer.vue'
@@ -24,6 +24,7 @@ export default {
   },
   data() {
     return {
+      hasToken: hasParam('token'),
       repos: [].concat.apply([], getAllParam('repos').map(repos => {
         const matches = repos.match(/(\w+\/)\{([\S]+)\}/)
         return !matches ? [repos] : matches.slice(2).pop().split(',').map(repo => matches.slice(1, 2) + repo)
